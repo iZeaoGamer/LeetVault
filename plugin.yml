@@ -1,0 +1,59 @@
+name: LeetVault
+main: Marcel2508\LeetVault
+version: 1.0.0
+api: [3.0.0-ALPHA10]
+load: STARTUP
+author: Marcel2508
+description: Allows you to use virtual chest inventories
+
+commands:
+ lv:
+  usage: /lv [vault]
+  aliases: ["leetvault"]
+  permission: leetvault.vault.use
+ lva:
+  usage: /lva <vault> <playername>
+  aliases: ["leetvaultadmin"]
+  permission: leetvault.admin.use
+ lvc:
+  usage: /lvc [vault]
+  aliases: ["leetvaultclear"]
+  permission: leetvault.vault.clear
+ lvac:
+  usage: /lvac <vault> <playername>
+  aliases: ["leetvaultadminclear"]
+  permission: leetvault.admin.clear
+ leetvaultadminwipe:
+  usage: /leetvaultadminwipe [playername]
+  aliases: []
+  permission: leetvault.admin.wipe
+ lvh:
+  usage: /lvh
+  aliases: [leetvaulthelp]
+  permission: leetvault.help
+ leetvaultadminsetlimit:
+  usage: /leetvaultadminsetlimit <limit>
+  aliases: []
+  permission: leetvault.admin.setlimit
+permissions:
+    leetvault.vault.use:
+        default: true
+        description: Allows players to use vaults
+    leetvault.admin.use:
+        default: false
+        description: Allows admins to use other players vault inventory (get or store items!)
+    leetvault.vault.clear:
+        default: true
+        description: Allows players to clear one of theire vaults
+    leetvault.admin.clear:
+        default: false
+        description: Allows admins to clear players vault
+    leetvault.admin.wipe:
+        default: false
+        description: Allows admins to wipe all vaults
+    leetvault.help:
+        default: true
+        description: Shows help page
+    leetvault.admin.setlimit:
+        default: false
+        description: Set the vault limit for the players

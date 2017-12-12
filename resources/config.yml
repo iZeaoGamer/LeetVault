@@ -1,0 +1,5 @@
+## Leet Vault (MCPE PLUGIN) ##
+# Allows you the usage of virtual Inventories #
+
+#Sets the maximum allowed vault amount
+max-vault-amount: 10
