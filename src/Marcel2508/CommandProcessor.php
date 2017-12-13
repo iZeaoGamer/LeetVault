@@ -187,24 +187,18 @@ class CommandProcessor {
 
     private function getHelpPage(Player $player) : bool {
 
-        $output = "LeetVault 1.1 Help:\n";
-        if($player->hasPermission("leetvault.use"))$output .= "/lv help - shows this help\n";
-        if($player->hasPermission("leetvault.use")&&$player->hasPermission("leetvault.admin"))$output .= "  leetvault.use\n";
+        $output = "LeetVault 1.1.2 Help:\n";
+        if($this->hasRight($player,"leetvault.help",false))$output .= "/lv help - shows this help\n";
 
-        if($player->hasPermission("leetvault.use"))$output .= "/lv [vaultno] - opens the specified vault - otherwiese the first one\n";
-        if($player->hasPermission("leetvault.use")&&$player->hasPermission("leetvault.admin"))$output .= "  leetvault.use\n";
+        if($this->hasRight($player,"leetvault.vault.use",false))$output .= "/lv [vaultno] - opens the specified vault - otherwiese the first one\n";
 
-        if($player->hasPermission("leetvault.admin"))$output .= "/lva <vaultno> <playername> - opens the specified vault of the specified player\n";
-        if($player->hasPermission("leetvault.admin"))$output .= "  leetvault.admin\n";
+        if($this->hasRight($player,"leetvault.admin.use",false)||$this->hasRight($player,"leetvault.admin.view",false))$output .= "/lva <vaultno> <playername> - opens the specified vault of the specified player\n";
 
-        if($player->hasPermission("leetvault.use"))$output .= "/lv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
-        if($player->hasPermission("leetvault.admin")&&$player->hasPermission("leetvault.use"))$output .= "  leetvault.use\n";
+        if($this->hasRight($player,"leetvault.vault.clear",false))$output .= "/lv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
 
-        if($player->hasPermission("leetvault.admin"))$output .= "/lva clear <#vaultNo/all> <playername> - clears the specified vault of the specified player\n";
-        if($player->hasPermission("leetvault.admin"))$output .= "  leetvault.admin\n";
+        if($this->hasRight($player,"leetvault.admin.clear",false))$output .= "/lva clear <#vaultNo/all> <playername> - clears the specified vault of the specified player\n";
 
-        if($player->hasPermission("leetvault.admin"))$output .= "/lva setlimit <limit> - sets the limit of vaults per player\n";
-        if($player->hasPermission("leetvault.admin"))$output .= "  leetvault.admin\n";
+        if($this->hasRight($player,"leetvault.admin.setlimit",false))$output .= "/lva setlimit <limit> - sets the limit of vaults per player\n";
         $player->sendMessage($this->plugin->msg($output));
         return true;
     }
@@ -220,12 +214,14 @@ class CommandProcessor {
         $argCount = count($args);
         $playerId = $player->getId();
         if($argCount==0){
+            if(!$this->hasRight($player,"leetvault.vault.use"))return true;
             //SHOW FIRST VAULT
             $this->showVault($player,$playerId,1);
             return true;
         }
         else{
             if(strtolower($args[0])=="clear"){
+                if(!$this->hasRight($player,"leetvault.vault.clear"))return true;
                 //STATE: IS CLEAR COMMAND
                 if($argCount==2){
                     if(strtolower($args[1])=="all"){
@@ -260,11 +256,13 @@ class CommandProcessor {
                 }
             }
             else if(strtolower($args[0])=="help"){
+                if(!$this->hasRight($player,"leetvault.vault.help"))return true;
                 //SHOW HELP
                 $this->getHelpPage($player);
                 return true;
             }
             else{
+                if(!$this->hasRight($player,"leetvault.vault.use"))return true;
                 if(is_numeric($args[0])&&($intArg=intval($args[0]))>0){
                     //IF: Test for limit
                     if($intArg>0&&$intArg<=$this->plugin->settings["max-vault-amount"]){
@@ -300,6 +298,7 @@ class CommandProcessor {
         }
         else{
             if(strtolower($args[0])=="clear"){
+                if(!$this->hasRight($player,"leetvault.admin.clear"))return true;
                 //STATE: IS CLEAR COMMAND
                 if($argCount==3){
                     $tPlayer = $this->plugin->getServer()->getPlayer($args[2]);
@@ -344,12 +343,14 @@ class CommandProcessor {
             //END CLEAR
             //JUST FOR COMPABILITY. NOT OfFICALLY DOCUMENTED!
             else if(strtolower($args[0])=="help"){
+                if(!$this->hasRight($player,"leetvault.vault.help"))return true;
                 //SHOW HELP
                 $this->getHelpPage($player);
                 return true;
             }
             //END HELP
             else if(strtolower($args[0])=="setlimit"){
+                if(!$this->hasRight($player,"leetvault.admin.setlimit"))return true;
                 //Set LIMIT COMMAND
                 if($argCount==2){
                     if(is_numeric($args[1])&&($intArg=intval($args[1]))>0){
@@ -371,6 +372,7 @@ class CommandProcessor {
             }
             //END SETLIMIT
             else{
+                if(!($this->hasRight($player,"leetvault.admin.view")||$this->hasRight($player,"leetvault.admin.use")))return true;
                 if($argCount==2){
                     $tPlayer = $this->plugin->getServer()->getPlayer($args[1]);
                     if($tPlayer){
@@ -409,6 +411,23 @@ class CommandProcessor {
                 }
             }
         }
+        return false;
+    }
+
+    private function hasRight(Player $player, string $permissionNode,bool $showMessage=true) : bool{
+        $nodeList = [];
+        $parts = explode(".",$permissionNode);
+        $akt = "";
+        for($i=0; $i<count($parts)-1;$i++){
+            $akt .= $parts[$i].".";
+            if($player->hasPermission($akt."*")){
+                return true;
+            }
+        }
+        if($player->hasPermission($permissionNode)||$player->hasPermission("*")||$player->isOp()){
+            return true;
+        }
+        if($showMessage)$player->sendMessage($this->plugin->msg("You are not allowed to use this command!"));
         return false;
     }
 

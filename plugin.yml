@@ -1,6 +1,6 @@
 name: LeetVault
 main: Marcel2508\LeetVault
-version: 1.1.0
+version: 1.1.2
 api: [3.0.0-ALPHA10]
 load: STARTUP
 author: Marcel2508
@@ -10,15 +10,30 @@ commands:
  lv:
   usage: /lv [clear/#vaultNo/help] [#vaultNo (if clear is given)]
   aliases: ["leetvault"]
-  permission: leetvault.use
+  #permission: leetvault.vault.use
  lva:
   usage: /lva <#vaultNo/clear/setlimit> <playername/(#vaultNo/all)/#limit> [playername (if clear is given)]
   aliases: ["leetvaultadmin"]
-  permission: leetvault.admin
+  #permission: leetvault.admin.view
 permissions:
-    leetvault.use:
-        default: true
-        description: Allows players to use all basic commands
-    leetvault.admin:
+    leetvault.vault.use:
         default: false
-        description: Allows players to use all admin commands
+        description: Allows players to use vaults
+    leetvault.vault.clear:
+        default: false
+        description: Allows players to clear theire vaults
+    leetvault.vault.help:
+        default: false
+        description: Allows players to view leetvault help
+    leetvault.admin.view:
+        default: false
+        description: Allows admins to view players vaults
+    leetvault.admin.use:
+        default: false
+        description: Allows admins to use other players vaults
+    leetvault.admin.clear:
+        default: false
+        description: Allows admins to clear other players vaults
+    leetvault.admin.setlimit:
+        default: false
+        description: Allows admins to set vault limit server-wide

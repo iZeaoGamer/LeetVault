@@ -6,8 +6,11 @@ use pocketmine\item\Item;
 use pocketmine\Server;
 use pocketmine\block\BlockFactory;
 use pocketmine\event\inventory\InventoryCloseEvent;
+use pocketmine\event\inventory\InventoryTransactionEvent;
 use pocketmine\tile\Chest;
 use pocketmine\inventory\ChestInventory;
+use pocketmine\inventory\PlayerInventory;
+use pocketmine\inventory\PlayerCursorInventory;
 use SQLite3;
 
 class PlayerEvents implements Listener {
@@ -19,7 +22,6 @@ class PlayerEvents implements Listener {
     public function __construct(LeetVault $plugin) {
         $this->plugin = $plugin;
         $this->inventorySpawner = new InventorySpawner();
-        
     }
 
     private function saveVault(ChestInventory $inventory, Player $player, int $vault, int $vaultPlayerId,int $vaultPlayerAdminId){
@@ -58,6 +60,23 @@ class PlayerEvents implements Listener {
         }
     }
 
+    private function hasRight(Player $player, string $permissionNode) : bool{
+        $nodeList = [];
+        $parts = explode(".",$permissionNode);
+        $akt = "";
+        for($i=0; $i<count($parts)-1;$i++){
+            $akt .= $parts[$i].".";
+            if($player->hasPermission($akt."*")){
+                return true;
+            }
+        }
+        if($player->hasPermission($permissionNode)||$player->hasPermission("*")||$player->isOp()){
+            return true;
+        }
+        //DONT NEED ON EVENTS $player->sendMessage($this->plugin->msg("You are not allowed to use this!"));
+        return false;
+    }
+
 
     public function onInventoryClose(InventoryCloseEvent $event){
         $inventory = $event->getInventory();
@@ -65,21 +84,52 @@ class PlayerEvents implements Listener {
         $player = $event->getPlayer();
         $playerVault = isset($holder->getNBT()->PlayerVault)?$holder->getNBT()->PlayerVault:false;
         if($playerVault){
-            
-            $this->saveVault($inventory,$player,$playerVault->PlayerVaultNumber.'',$playerVault->PlayerId.'',$playerVault->AdminView.'');
+            if(($playerVault->AdminView.''==-1&&$this->hasRight($player,"leetvault.vault.use"))||($playerVault->AdminView.''!=-1&&$this->hasRight($player,"leetvault.admin.use")))//ONLY SAVE IF USER IS PERMITTED TO USE THAT CHEST
+                $this->saveVault($inventory,$player,$playerVault->PlayerVaultNumber.'',$playerVault->PlayerId.'',$playerVault->AdminView.'');
 
             //I KNOW, ITS A FAKE CHEST - Refresh Chunk to remove fake block from Players map!
             $player->getLevel()->requestChunk($player->getFloorX() >> 4, $player->getFloorZ() >> 4, $player);
         }
     }
 
-    /*PROBABLY NOT NEEDED
-    public function onItemTransactionEvent(InventoryTransactionEvent $event){
-        $transaction = $event->getTransaction();
-        $event->setCancelled(true);
-        echo "STOPPED YOU FROM DOING IT!\r\n";
-    }*/
+    private function getCancelledStateForTransaction(Player $player) : bool {//, PlayerInventory $pinv, ChestInventory $cinv) : bool{
+        if($this->hasRight($player,"leetvault.admin.use"))return false;
+        if($this->hasRight($player,"leetvault.admin.view"))return true;
+        else return true;
+    }
 
-    
+    public function onItemTransactionEvent(InventoryTransactionEvent $event){
+        //$transactions = $event->getTransaction()->getInventories();
+        $inventories = $event->getTransaction()->getInventories();
+        /*foreach($transactions as $transaction){
+            $inventories[]=$transaction->getInventory();
+        }*/
+        $ti = [];
+        foreach($inventories as $tinv)$ti[]=$tinv;
+        $inventories=$ti;
+        if(count($inventories)==2){
+            $cancelled = false;
+            if($inventories[0] instanceof ChestInventory){
+                if($inventories[1] instanceof PlayerInventory || $inventories[1] instanceof PlayerCursorInventory){
+                    $nbt = $inventories[0]->getHolder()->getNBT();
+                    if(isset($nbt->PlayerVault)&&$nbt->PlayerVault->AdminView!==-1){
+                        $cancelled = $this->getCancelledStateForTransaction($inventories[1]->getHolder());
+                    }
+                }
+                //,$inventories[1],$inventories[0]);
+            }
+            else if($inventories[0] instanceof PlayerInventory || $inventories[0] instanceof PlayerCursorInventory){
+                if($inventories[1] instanceof ChestInventory){
+                    $nbt = $inventories[1]->getHolder()->getNBT();
+                    if(isset($nbt->PlayerVault)&&$nbt->PlayerVault->AdminView!==-1){
+                        $cancelled = $this->getCancelledStateForTransaction($inventories[0]->getHolder());
+                    }
+                }
+                
+                //$cancelled = $this->getCancelledStateForTransaction($inventories[0]->getHolder());//,$inventories[0],$inventories[1]);
+            }
+            if($cancelled)$event->setCancelled(true);
+        }
+    }
 
 }

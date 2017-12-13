@@ -23,7 +23,7 @@ class InventorySpawner {
 
     private function getFakeChestTile(Player $player,array $chestConfig,String $title) : Chest{
         $level = $player->getLevel();
-        $pos = new Position(intval($player->x),intval($player->y)-2,intval($player->z),$level);
+        $pos = new Position(intval($player->x),intval($player->y)-3,intval($player->z),$level);
         $block = BlockFactory::get(54,0,$pos);
         //Fake Block for Player
         $level->sendBlocks([$player],[$block]);
@@ -41,7 +41,7 @@ class InventorySpawner {
                 new IntTag("AdminView",$chestConfig[2])
             ]),
             new IntTag("x",intval($pos[0])),
-            new IntTag("y",intval($pos[1])-2),
+            new IntTag("y",intval($pos[1])-3),
             new IntTag("z",intval($pos[2])),
         ]);
         $nbt->Items->setTagType(NBT::TAG_Compound);
