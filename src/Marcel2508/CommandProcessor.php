@@ -19,6 +19,7 @@ class CommandProcessor {
         $this->inventorySpawner = new InventorySpawner();
     }
 
+    //DB LOGIC:
     private function getVaultContents($player,$vault){
         $query = "SELECT * FROM `vaults` WHERE `player` = ".$player." AND `vault` = '".$this->plugin->db->escapeString($vault)."';";
         $res = $this->plugin->db->query($query);
@@ -30,18 +31,18 @@ class CommandProcessor {
             return null;
         }
     }
-
     private function clearVaultContents(int $player,int $vault){
         $query = "DELETE FROM `vaults` WHERE `player` = '".$player."' AND `vault` = '".$this->plugin->db->escapeString($vault)."';";
         $res = $this->plugin->db->exec($query);
         return $res;
     }
 
+    /*USELESS
     private function wipeAllVaults(){
         $query = "DELETE FROM `vaults`;";
         $res = $this->plugin->db->exec($query);
         return $res;
-    }
+    }*/
 
     private function wipePlayerVaults($player){
         $query = "DELETE FROM `vaults` WHERE `player` = '".$player."';";
@@ -49,26 +50,19 @@ class CommandProcessor {
         return $res;
     }
 
-    private function showVault(Player $player, array $args) : bool{
+    //COMMAND LOGIC:
 
-        $vault = 1;
-        $playerId=$player->getId();
-        if(count($args)==1){
-            if(!is_numeric($args[0])||intval($args[0])<1){
-                $player->sendMessage($this->plugin->msg("Wrong identifier. Please use vault numbers from 1 to ".$this->plugin->settings["max-vault-amount"]."!"));
-                return true;
-            }
-            $vault = intval($args[0]);
-            if($vault>$this->plugin->settings["max-vault-amount"]){
-                $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
-                return true;
-            }
+    private function showVault(Player $player, int $targetId,int $vault) : bool{
+        if($player->getGamemode()==1&&$player->hasPermission("limitedcreative.permission.creative")){
+            $player->sendMessage($this->plugin->msg("Limited creative blocks access to this command while in creative mode!"));
+            return true;
         }
 
+        $playerId=$player->getId();
         //Creating Inventory
-        $inventory = $this->inventorySpawner->getInventory($player,[$playerId,$vault,-1],"Vault #".$vault);
+        $inventory = $this->inventorySpawner->getInventory($player,[$targetId,$vault,($targetId!==$playerId?$playerId:-1)],"Vault #".$vault);
         //Get Item Array from DB File
-        $content = $this->getVaultContents($playerId,$vault);
+        $content = $this->getVaultContents($targetId,$vault);
         //Add all Items to the Inventory
         while($itemRaw = $content->fetchArray(SQLITE3_ASSOC)){
             $newItem = ItemFactory::FromString($itemRaw["itemid"].":".$itemRaw["meta"]);
@@ -82,11 +76,12 @@ class CommandProcessor {
 
         //Display Vault
         $player->addWindow($inventory);
-        $player->sendMessage($this->plugin->msg("Open vault #".$vault));
+        $player->sendMessage($this->plugin->msg("Opened ".($targetId!=$playerId?"players ":"")."vault #".$vault));
 
         return true;
     }
 
+    /* USELESS
     private function showVaultAsAdmin(Player $player, array $args) : bool{
         
         $vault = 1;
@@ -139,29 +134,15 @@ class CommandProcessor {
         $player->sendMessage($this->plugin->msg("Open vault #".$vault." as admin"));
 
         return true;
-    }
+    }*/
 
-    private function clearVault(Player $player, array $args):bool{
-
-        $vault = 1;
-        $playerId=$player->getId();
-        if(count($args)==1){
-            if(!is_numeric($args[0])||intval($args[0])<1){
-                $player->sendMessage($this->plugin->msg("Wrong identifier. Please use vault numbers from 1 to ".$this->plugin->settings["max-vault-amount"]."!"));
-                return true;
-            }
-            $vault = intval($args[0]);
-            if($vault>$this->plugin->settings["max-vault-amount"]){
-                $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
-                return true;
-            }
-        }
-
-        $this->clearVaultContents($playerId,$vault);
-        $player->sendMessage($this->plugin->msg("Cleared your vaults content!"));
+    private function clearVault(Player $player, int $targetId, int $vault):bool{
+        $this->clearVaultContents($targetId,$vault);
+        $player->sendMessage($this->plugin->msg("Cleared ".($player->getId()!=$targetId?"players":"your")." vault content!"));
         return true;
     }
 
+    /*USELESS NOW: 
     private function clearVaultAsAdmin(Player $player, array $args):bool{
         
         $vault = 1;
@@ -194,156 +175,257 @@ class CommandProcessor {
         $this->clearVaultContents($targetPlayerId,$vault);
         $player->sendMessage($this->plugin->msg("Cleared the players vaults content!"));
         return true;
-    }
+    }*/
 
 
-    private function wipeVaults($sender,$args){
-        $targetPlayerId=-1;
-        if(count($args)==1){
-            
-            if($args[0]=="ALL"){
-                $targetPlayerId=-2;
-            }
-            else{
-                $tplayer = $this->plugin->getServer()->getPlayer($args[0]);
-                if($tplayer){
-                    $targetPlayerId=$tplayer->getId();
-                }
-                else{
-                    $player->sendMessage($this->plugin->msg("Can't find player with that name!"));
-                    return true;
-                }
-            }
-        }
-        else{
-            $player->sendMessage($this->plugin->msg("This command requires exactly 1 argument!"));
-            return false;
-        }
-        if($targetPlayerId>=0){
-            $this->wipePlayerVaults($targetPlayerId);
-        }
-        else if($targetPlayerId===-2){
-            $this->wipeAllVaults();
-        }
-        else{
-            $player->sendMessage($this->plugin->msg("Use \"/leetvaultadminwipe ALL\" to wipe all data"));
-            return false;
-        }
+    private function wipeVaults(Player $player,int $targetId){
+        //TODO: REFACTOR 
+        $this->wipePlayerVaults($targetId);
+        $player->sendMessage($this->plugin->msg("Cleared all ".($player->getId()!=$targetId?" vaults of that player!":"your vaults!")));
         return true;
     }
 
     private function getHelpPage(Player $player) : bool {
 
-        $output = "LeetVault 1.0 Help:\n";
-        if($player->hasPermission("leetvault.help"))$output .= "/lvh - shows this help\n";
-        if($player->hasPermission("leetvault.help")&&$player->hasPermission("leetvault.admin.use"))$output .= "  leetvault.help\n";
+        $output = "LeetVault 1.1 Help:\n";
+        if($player->hasPermission("leetvault.use"))$output .= "/lv help - shows this help\n";
+        if($player->hasPermission("leetvault.use")&&$player->hasPermission("leetvault.admin"))$output .= "  leetvault.use\n";
 
-        if($player->hasPermission("leetvault.vault.use"))$output .= "/lv [vaultnr] - opens the specified vault\n";
-        if($player->hasPermission("leetvault.vault.use")&&$player->hasPermission("leetvault.admin.use"))$output .= "  leetvault.vault.use\n";
+        if($player->hasPermission("leetvault.use"))$output .= "/lv [vaultno] - opens the specified vault - otherwiese the first one\n";
+        if($player->hasPermission("leetvault.use")&&$player->hasPermission("leetvault.admin"))$output .= "  leetvault.use\n";
 
-        if($player->hasPermission("leetvault.admin.use"))$output .= "/lva <vaultnr> <playername> - opens the specified vault of the specified player\n";
-        if($player->hasPermission("leetvault.admin.use"))$output .= "  leetvault.admin.use\n";
+        if($player->hasPermission("leetvault.admin"))$output .= "/lva <vaultno> <playername> - opens the specified vault of the specified player\n";
+        if($player->hasPermission("leetvault.admin"))$output .= "  leetvault.admin\n";
 
-        if($player->hasPermission("leetvault.vault.clear"))$output .= "/lvc [vaultnr] - clears the specified vault\n";
-        if($player->hasPermission("leetvault.admin.use")&&$player->hasPermission("leetvault.vault.clear"))$output .= "  leetvault.vault.clear\n";
+        if($player->hasPermission("leetvault.use"))$output .= "/lv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
+        if($player->hasPermission("leetvault.admin")&&$player->hasPermission("leetvault.use"))$output .= "  leetvault.use\n";
 
-        if($player->hasPermission("leetvault.admin.clear"))$output .= "/lvac <vaultnr> <playername> - clears the specified vault of the specified player\n";
-        if($player->hasPermission("leetvault.admin.clear"))$output .= "  leetvault.admin.clear\n";
+        if($player->hasPermission("leetvault.admin"))$output .= "/lva clear <#vaultNo/all> <playername> - clears the specified vault of the specified player\n";
+        if($player->hasPermission("leetvault.admin"))$output .= "  leetvault.admin\n";
 
-        if($player->hasPermission("leetvault.admin.wipe"))$output .= "/lvac <playername/ALL> - Wipes the players / all players vaults\n";
-        if($player->hasPermission("leetvault.admin.wipe"))$output .= "  leetvault.admin.wipe\n";
-
-        if($player->hasPermission("leetvault.admin.setlimit"))$output .= "/leetvaultadminsetlimit <limit> - sets the limit of vaults per player\n";
-        if($player->hasPermission("leetvault.admin.setlimit"))$output .= "  leetvault.admin.setlimit\n";
+        if($player->hasPermission("leetvault.admin"))$output .= "/lva setlimit <limit> - sets the limit of vaults per player\n";
+        if($player->hasPermission("leetvault.admin"))$output .= "  leetvault.admin\n";
         $player->sendMessage($this->plugin->msg($output));
         return true;
     }
 
-    private function setVaultLimit(Player $player, array $args) : bool{
-        if(count($args)==1){
-            
-            if(!is_numeric($args[0])||intval($args[0])<1){
-                $player->sendMessage($this->plugin->msg("Wrong identifier. Please use a valid number between 1 and your maximum!"));
+    private function setVaultLimit(Player $player, int $limit) : bool{
+        $this->plugin->setLimit($limit);
+        $player->sendMessage($this->plugin->msg("Vault limit has been changed to ".$this->plugin->settings["max-vault-amount"]));
+        return true;
+    }
+
+    //All commands begin with /lv
+    private function playerCommand(Player $player, array $args) : bool{
+        $argCount = count($args);
+        $playerId = $player->getId();
+        if($argCount==0){
+            //SHOW FIRST VAULT
+            $this->showVault($player,$playerId,1);
+            return true;
+        }
+        else{
+            if(strtolower($args[0])=="clear"){
+                //STATE: IS CLEAR COMMAND
+                if($argCount==2){
+                    if(strtolower($args[1])=="all"){
+                        $this->wipeVaults($player,$playerId);
+                        return true;
+                    }
+                    else{
+                        if(is_numeric($args[1])&&($intArg=intval($args[1]))>0){
+                            //IF: check max amount
+                            if($intArg>0&&$intArg<=$this->plugin->settings["max-vault-amount"]){
+                                //OKay, clear vault #[$intArg]
+                                $this->clearVault($player,$playerId,$intArg);
+                                return true;
+                            }
+                            else{
+                                //MAX VAULT EXCEED
+                                $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
+                                return true;
+                            }
+                        }
+                        else{
+                            //ERROR - Invalid Identifier!
+                            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                            return false;
+                        }
+                    }
+                }
+                else{
+                    //CLEAR VAULT 1
+                    $this->clearVault($player,$playerId,1);
+                    return true;
+                }
+            }
+            else if(strtolower($args[0])=="help"){
+                //SHOW HELP
+                $this->getHelpPage($player);
                 return true;
             }
             else{
-                $this->plugin->setLimit(intval($args[0]));
-                $player->sendMessage($this->plugin->msg("Vault limit has been changed to ".$this->plugin->settings["max-vault-amount"]));
-                return true;
+                if(is_numeric($args[0])&&($intArg=intval($args[0]))>0){
+                    //IF: Test for limit
+                    if($intArg>0&&$intArg<=$this->plugin->settings["max-vault-amount"]){
+                        //OKay, show vault #[$intArg]
+                        $this->showVault($player,$playerId,$intArg);
+                        return true;
+                    }
+                    else{
+                        //MAX VAULT EXCEED
+                        $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
+                        return true;
+                    }
+                }
+                else{
+                    //ERROR - Invalid Identifier!
+                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                    return false;
+                }
             }
         }
-        else{
-            $player->sendMessage($this->plugin->msg("This command needs exactly 1 parameter!"));
+        return false;
+    }
+
+    //All Commands begin with /lva
+    private function adminCommand(Player $player, array $args) : bool{
+
+        $argCount = count($args);
+        $playerId = $player->getId();
+        if($argCount<1){
+            //SHOW FIRST VAULT
+            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
             return false;
         }
+        else{
+            if(strtolower($args[0])=="clear"){
+                //STATE: IS CLEAR COMMAND
+                if($argCount==3){
+                    $tPlayer = $this->plugin->getServer()->getPlayer($args[2]);
+                    if($tPlayer){
+                        $tPlayerId = $tPlayer->getId();
+                        if(strtolower($args[1])=="all"){
+                            $this->wipeVaults($player,$tPlayerId);
+                            return true;
+                        }
+                        else{
+                            if(is_numeric($args[1])&&($intArg=intval($args[1]))>0){
+                                //IF: check max amount
+                                if($intArg>0&&$intArg<=$this->plugin->settings["max-vault-amount"]){
+                                    //OKay, clear vault #[$intArg]
+                                    $this->clearVault($player,$tPlayerId,$intArg);
+                                    return true;
+                                }
+                                else{
+                                    //MAX VAULT EXCEED
+                                    $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
+                                    return true;
+                                }
+                            }
+                            else{
+                                //ERROR - Invalid Identifier!
+                                $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                                return false;
+                            }
+                        }
+                    }
+                    else{
+                        $player->sendMessage($this->plugin->msg("Can't find a player with that name!"));
+                        return false;
+                    }
+                }
+                else{
+                    //ERROR NOT ENOUGH ARGUMENTS!
+                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                    return false;
+                }
+            }
+            //END CLEAR
+            //JUST FOR COMPABILITY. NOT OfFICALLY DOCUMENTED!
+            else if(strtolower($args[0])=="help"){
+                //SHOW HELP
+                $this->getHelpPage($player);
+                return true;
+            }
+            //END HELP
+            else if(strtolower($args[0])=="setlimit"){
+                //Set LIMIT COMMAND
+                if($argCount==2){
+                    if(is_numeric($args[1])&&($intArg=intval($args[1]))>0){
+                        //change config
+                        $this->setVaultLimit($player,$intArg);
+                        return true;
+                    }
+                    else{
+                        //Error not numeric
+                        $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                        return false;
+                    }
+                }
+                else{
+                    //ERROR to few arguments
+                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                    return false;
+                }
+            }
+            //END SETLIMIT
+            else{
+                if($argCount==2){
+                    $tPlayer = $this->plugin->getServer()->getPlayer($args[1]);
+                    if($tPlayer){
+                        $tPlayerId = $tPlayer->getId();
+                        //PLAYER FOUND proceed
+                        if(is_numeric($args[0])&&($intArg=intval($args[0]))>0){
+                            //IF: Test for limit
+                            if($intArg>0&&$intArg<=$this->plugin->settings["max-vault-amount"]){
+                                //OKay, show vault #[$intArg]
+                                $this->showVault($player,$tPlayerId,$intArg);
+                                return true;
+                            }
+                            else{
+                                //MAX VAULT EXCEED
+                                $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
+                                return true;
+                            }
+                        }
+                        else{
+                            //ERROR - Invalid Identifier!
+                            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                            return false;
+                        }
+
+                    }
+                    else{
+                        //ERROR PLAYER NOT FOUND
+                        $player->sendMessage($this->plugin->msg("Can't find a player with that name!"));
+                        return false;
+                    }
+                }
+                else{
+                    //ERROR: INVALID COMMAND
+                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     public function onCommand(CommandSender $sender, Command $command, string $label, array $args) : bool{
         if(!$sender instanceof Player){
-            $this->plugin->getServer()->getLogger()->info("This command is only for ingame use!");
+            $this->plugin->getServer()->getLogger()->info("This command is only made for ingame use!");
             return true;
         }
-        switch(strtolower($command->getName())){
+    
+        $commandStr = strtolower($command->getName());
+        switch($commandStr){
             case "leetvault":
             case "lv":
-                if($sender->getGamemode()==1&&$sender->hasPermission("limitedcreative.permission.creative")){
-                    $sender->sendMessage($this->plugin->msg("LimitedCreative disallows usage of vaults while in creative mode!"));
-                    return true;
-                }
-                else{
-                    if($sender->hasPermission("leetvault.vault.use"))
-                        return $this->showVault($sender,$args);
-                    else{
-                        $sender->sendMessage($this->plugin->msg("You're not allowed to use this command!"));
-                        return true;
-                    }
-                }
+                return $this->playerCommand($sender,$args);
             case "leetvaultadmin":
             case "lva":
-                if($sender->hasPermission("leetvault.admin.use"))
-                    return $this->showVaultAsAdmin($sender,$args);
-                else{
-                    $sender->sendMessage($this->plugin->msg("You're not allowed to use this command!"));
-                    return true;
-                }
-            case "leetvaultclear":
-            case "lvc":
-                if($sender->hasPermission("leetvault.vault.clear"))
-                    return $this->clearVault($sender,$args);
-                else{
-                    $sender->sendMessage($this->plugin->msg("You're not allowed to use this command!"));
-                    return true;
-                }
-            case "leetvaultadminclear":
-            case "lvac":
-                if($sender->hasPermission("leetvault.admin.clear"))
-                    return $this->clearVaultAsAdmin($sender,$args);
-                else{
-                    $sender->sendMessage($this->plugin->msg("You're not allowed to use this command!"));
-                    return true;
-                }
-            case "leetvaultadminwipe":
-                if($sender->hasPermission("leetvault.admin.wipe"))
-                    return $this->wipeVaults($sender,$args);
-                else{
-                    $sender->sendMessage($this->plugin->msg("You're not allowed to use this command!"));
-                    return true;
-                }
-            case "lvh":
-            case "leetvaulthelp":
-                if($sender->hasPermission("leetvault.help"))
-                    return $this->getHelpPage($sender);
-                else{
-                    $sender->sendMessage($this->plugin->msg("You're not allowed to use this command!"));
-                    return true;
-                }
-            case "leetvaultadminsetlimit":
-                if($sender->hasPermission("leetvault.admin.setlimit"))
-                    return $this->setVaultLimit($sender,$args);
-                else{
-                    $sender->sendMessage($this->plugin->msg("You're not allowed to use this command!"));
-                    return true;
-                }
+                return $this->adminCommand($sender,$args);
         }
         return false;
     }
