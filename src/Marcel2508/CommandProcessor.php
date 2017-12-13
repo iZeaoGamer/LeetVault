@@ -187,12 +187,12 @@ class CommandProcessor {
 
     private function getHelpPage(Player $player) : bool {
 
-        $output = "LeetVault 1.1.2 Help:\n";
+        $output = "LeetVault 1.1.3 Help:\n";
         if($this->hasRight($player,"leetvault.help",false))$output .= "/lv help - shows this help\n";
 
         if($this->hasRight($player,"leetvault.vault.use",false))$output .= "/lv [vaultno] - opens the specified vault - otherwiese the first one\n";
 
-        if($this->hasRight($player,"leetvault.admin.use",false)||$this->hasRight($player,"leetvault.admin.view",false))$output .= "/lva <vaultno> <playername> - opens the specified vault of the specified player\n";
+        if($this->hasRight($player,"leetvault.admin.edit",false)||$this->hasRight($player,"leetvault.admin.view",false))$output .= "/lva <vaultno> <playername> - opens the specified vault of the specified player\n";
 
         if($this->hasRight($player,"leetvault.vault.clear",false))$output .= "/lv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
 
@@ -372,7 +372,7 @@ class CommandProcessor {
             }
             //END SETLIMIT
             else{
-                if(!($this->hasRight($player,"leetvault.admin.view")||$this->hasRight($player,"leetvault.admin.use")))return true;
+                if(!($this->hasRight($player,"leetvault.admin.view")||$this->hasRight($player,"leetvault.admin.edit")))return true;
                 if($argCount==2){
                     $tPlayer = $this->plugin->getServer()->getPlayer($args[1]);
                     if($tPlayer){

@@ -2,4 +2,4 @@
 # Allows you the usage of virtual Inventories #
 
 #Sets the maximum allowed vault amount
-max-vault-amount: 10
+max-vault-amount: 3

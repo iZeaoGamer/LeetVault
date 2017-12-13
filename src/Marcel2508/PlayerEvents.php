@@ -84,7 +84,7 @@ class PlayerEvents implements Listener {
         $player = $event->getPlayer();
         $playerVault = isset($holder->getNBT()->PlayerVault)?$holder->getNBT()->PlayerVault:false;
         if($playerVault){
-            if(($playerVault->AdminView.''==-1&&$this->hasRight($player,"leetvault.vault.use"))||($playerVault->AdminView.''!=-1&&$this->hasRight($player,"leetvault.admin.use")))//ONLY SAVE IF USER IS PERMITTED TO USE THAT CHEST
+            if(($playerVault->AdminView.''==-1&&$this->hasRight($player,"leetvault.vault.use"))||($playerVault->AdminView.''!=-1&&$this->hasRight($player,"leetvault.admin.edit")))//ONLY SAVE IF USER IS PERMITTED TO USE THAT CHEST
                 $this->saveVault($inventory,$player,$playerVault->PlayerVaultNumber.'',$playerVault->PlayerId.'',$playerVault->AdminView.'');
 
             //I KNOW, ITS A FAKE CHEST - Refresh Chunk to remove fake block from Players map!
@@ -93,7 +93,7 @@ class PlayerEvents implements Listener {
     }
 
     private function getCancelledStateForTransaction(Player $player) : bool {//, PlayerInventory $pinv, ChestInventory $cinv) : bool{
-        if($this->hasRight($player,"leetvault.admin.use"))return false;
+        if($this->hasRight($player,"leetvault.admin.edit"))return false;
         if($this->hasRight($player,"leetvault.admin.view"))return true;
         else return true;
     }
@@ -112,7 +112,7 @@ class PlayerEvents implements Listener {
             if($inventories[0] instanceof ChestInventory){
                 if($inventories[1] instanceof PlayerInventory || $inventories[1] instanceof PlayerCursorInventory){
                     $nbt = $inventories[0]->getHolder()->getNBT();
-                    if(isset($nbt->PlayerVault)&&$nbt->PlayerVault->AdminView!==-1){
+                    if(isset($nbt->PlayerVault)&&$nbt->PlayerVault->AdminView.''!=-1){
                         $cancelled = $this->getCancelledStateForTransaction($inventories[1]->getHolder());
                     }
                 }
@@ -121,7 +121,7 @@ class PlayerEvents implements Listener {
             else if($inventories[0] instanceof PlayerInventory || $inventories[0] instanceof PlayerCursorInventory){
                 if($inventories[1] instanceof ChestInventory){
                     $nbt = $inventories[1]->getHolder()->getNBT();
-                    if(isset($nbt->PlayerVault)&&$nbt->PlayerVault->AdminView!==-1){
+                    if(isset($nbt->PlayerVault)&&$nbt->PlayerVault->AdminView.''!=-1){
                         $cancelled = $this->getCancelledStateForTransaction($inventories[0]->getHolder());
                     }
                 }
