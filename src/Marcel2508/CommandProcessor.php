@@ -14,7 +14,7 @@ class CommandProcessor {
 
     private $plugin;
     
-    public function __construct(PlayerVault $plugin) {
+    public function __construct(PlayerVaults $plugin) {
         $this->plugin = $plugin;
         $this->inventorySpawner = new InventorySpawner();
     }
