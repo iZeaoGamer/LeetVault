@@ -14,7 +14,7 @@ class CommandProcessor {
 
     private $plugin;
     
-    public function __construct(LeetVault $plugin) {
+    public function __construct(PlayerVault $plugin) {
         $this->plugin = $plugin;
         $this->inventorySpawner = new InventorySpawner();
     }
@@ -76,7 +76,7 @@ class CommandProcessor {
 
         //Display Vault
         $player->addWindow($inventory);
-        $player->sendMessage($this->plugin->msg("Opened ".($targetId!=$playerId?"players ":"")."vault #".$vault));
+        $player->sendMessage($this->plugin->msg("§bOpened §3".($targetId!=$playerId?"players ":"")."§bvault #".$vault));
 
         return true;
     }
@@ -187,18 +187,18 @@ class CommandProcessor {
 
     private function getHelpPage(Player $player) : bool {
 
-        $output = "LeetVault 1.1.3 Help:\n";
-        if($this->hasRight($player,"leetvault.help",false))$output .= "/lv help - shows this help\n";
+        $output = "LeetVault 2.0.0-B1 Help:\n";
+        if($this->hasRight($player,"pv.help",false))$output .= "/pv help - shows this help\n";
 
-        if($this->hasRight($player,"leetvault.vault.use",false))$output .= "/lv [vaultno] - opens the specified vault - otherwiese the first one\n";
+        if($this->hasRight($player,"pv.vault.use",false))$output .= "/pv [vaultno] - opens the specified vault - otherwiese the first one\n";
 
-        if($this->hasRight($player,"leetvault.admin.edit",false)||$this->hasRight($player,"leetvault.admin.view",false))$output .= "/lva <vaultno> <playername> - opens the specified vault of the specified player\n";
+        if($this->hasRight($player,"pv.admin.edit",false)||$this->hasRight($player,"pv.admin.view",false))$output .= "/pva <vaultno> <playername> - opens the specified vault of the specified player\n";
 
-        if($this->hasRight($player,"leetvault.vault.clear",false))$output .= "/lv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
+        if($this->hasRight($player,"pv.vault.clear",false))$output .= "/pv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
 
-        if($this->hasRight($player,"leetvault.admin.clear",false))$output .= "/lva clear <#vaultNo/all> <playername> - clears the specified vault of the specified player\n";
+        if($this->hasRight($player,"pv.admin.clear",false))$output .= "/pva clear <#vaultNo/all> <playername> - clears the specified vault of the specified player\n";
 
-        if($this->hasRight($player,"leetvault.admin.setlimit",false))$output .= "/lva setlimit <limit> - sets the limit of vaults per player\n";
+        if($this->hasRight($player,"pv.admin.setlimit",false))$output .= "/pva setlimit <limit> - sets the limit of vaults per player\n";
         $player->sendMessage($this->plugin->msg($output));
         return true;
     }
@@ -209,19 +209,19 @@ class CommandProcessor {
         return true;
     }
 
-    //All commands begin with /lv
+    //All commands begin with /pv
     private function playerCommand(Player $player, array $args) : bool{
         $argCount = count($args);
         $playerId = $player->getId();
         if($argCount==0){
-            if(!$this->hasRight($player,"leetvault.vault.use"))return true;
+            if(!$this->hasRight($player,"pv.vault.use"))return true;
             //SHOW FIRST VAULT
             $this->showVault($player,$playerId,1);
             return true;
         }
         else{
             if(strtolower($args[0])=="clear"){
-                if(!$this->hasRight($player,"leetvault.vault.clear"))return true;
+                if(!$this->hasRight($player,"pv.vault.clear"))return true;
                 //STATE: IS CLEAR COMMAND
                 if($argCount==2){
                     if(strtolower($args[1])=="all"){
@@ -244,7 +244,7 @@ class CommandProcessor {
                         }
                         else{
                             //ERROR - Invalid Identifier!
-                            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
                             return false;
                         }
                     }
@@ -256,13 +256,13 @@ class CommandProcessor {
                 }
             }
             else if(strtolower($args[0])=="help"){
-                if(!$this->hasRight($player,"leetvault.vault.help"))return true;
+                if(!$this->hasRight($player,"pv.vault.help"))return true;
                 //SHOW HELP
                 $this->getHelpPage($player);
                 return true;
             }
             else{
-                if(!$this->hasRight($player,"leetvault.vault.use"))return true;
+                if(!$this->hasRight($player,"pv.vault.use"))return true;
                 if(is_numeric($args[0])&&($intArg=intval($args[0]))>0){
                     //IF: Test for limit
                     if($intArg>0&&$intArg<=$this->plugin->settings["max-vault-amount"]){
@@ -278,7 +278,7 @@ class CommandProcessor {
                 }
                 else{
                     //ERROR - Invalid Identifier!
-                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
                     return false;
                 }
             }
@@ -286,7 +286,7 @@ class CommandProcessor {
         return false;
     }
 
-    //All Commands begin with /lva
+    //All Commands begin with /pva
     private function adminCommand(Player $player, array $args) : bool{
 
         $argCount = count($args);
@@ -298,7 +298,7 @@ class CommandProcessor {
         }
         else{
             if(strtolower($args[0])=="clear"){
-                if(!$this->hasRight($player,"leetvault.admin.clear"))return true;
+                if(!$this->hasRight($player,"pv.admin.clear"))return true;
                 //STATE: IS CLEAR COMMAND
                 if($argCount==3){
                     $tPlayer = $this->plugin->getServer()->getPlayer($args[2]);
@@ -324,7 +324,7 @@ class CommandProcessor {
                             }
                             else{
                                 //ERROR - Invalid Identifier!
-                                $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                                $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
                                 return false;
                             }
                         }
@@ -336,21 +336,21 @@ class CommandProcessor {
                 }
                 else{
                     //ERROR NOT ENOUGH ARGUMENTS!
-                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
                     return false;
                 }
             }
             //END CLEAR
             //JUST FOR COMPABILITY. NOT OfFICALLY DOCUMENTED!
             else if(strtolower($args[0])=="help"){
-                if(!$this->hasRight($player,"leetvault.vault.help"))return true;
+                if(!$this->hasRight($player,"pv.vault.help"))return true;
                 //SHOW HELP
                 $this->getHelpPage($player);
                 return true;
             }
             //END HELP
             else if(strtolower($args[0])=="setlimit"){
-                if(!$this->hasRight($player,"leetvault.admin.setlimit"))return true;
+                if(!$this->hasRight($player,"pv.admin.setlimit"))return true;
                 //Set LIMIT COMMAND
                 if($argCount==2){
                     if(is_numeric($args[1])&&($intArg=intval($args[1]))>0){
@@ -360,19 +360,19 @@ class CommandProcessor {
                     }
                     else{
                         //Error not numeric
-                        $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                        $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
                         return false;
                     }
                 }
                 else{
                     //ERROR to few arguments
-                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
                     return false;
                 }
             }
             //END SETLIMIT
             else{
-                if(!($this->hasRight($player,"leetvault.admin.view")||$this->hasRight($player,"leetvault.admin.edit")))return true;
+                if(!($this->hasRight($player,"pv.admin.view")||$this->hasRight($player,"pv.admin.edit")))return true;
                 if($argCount==2){
                     $tPlayer = $this->plugin->getServer()->getPlayer($args[1]);
                     if($tPlayer){
@@ -393,7 +393,7 @@ class CommandProcessor {
                         }
                         else{
                             //ERROR - Invalid Identifier!
-                            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
                             return false;
                         }
 
@@ -406,7 +406,7 @@ class CommandProcessor {
                 }
                 else{
                     //ERROR: INVALID COMMAND
-                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
                     return false;
                 }
             }
@@ -439,11 +439,11 @@ class CommandProcessor {
     
         $commandStr = strtolower($command->getName());
         switch($commandStr){
-            case "leetvault":
-            case "lv":
+            case "playervault":
+            case "pv":
                 return $this->playerCommand($sender,$args);
-            case "leetvaultadmin":
-            case "lva":
+            case "playervaultadmin":
+            case "pva":
                 return $this->adminCommand($sender,$args);
         }
         return false;
