@@ -1,5 +1,5 @@
 name: VM-PlayerVault
-main: Marcel2508\LeetVault
+main: Marcel2508\PlayerVaults
 version: 2.0.0-Beta1
 api: [3.0.0-ALPHA10]
 load: STARTUP
@@ -9,11 +9,11 @@ description: Allows you to use virtual chest inventories
 commands:
  pv:
   usage: /pv [clear/#vaultNo/help] [#vaultNo (if clear is given)]
-  aliases: ["pvvault"]
+  aliases: ["playervault"]
   #permission: pv.vault.use
  pva:
   usage: /pva <#vaultNo/clear/setlimit> <playername/(#vaultNo/all)/#limit> [playername (if clear is given)]
-  aliases: ["pvadmin"]
+  aliases: ["playervaultadmin"]
   #permission: pv.admin.view
 permissions:
     pv.vault.use:
