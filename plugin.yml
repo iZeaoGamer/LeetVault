@@ -17,13 +17,13 @@ commands:
   #permission: pv.admin.view
 permissions:
     pv.vault.use:
-        default: false
+        default: true
         description: Allows players to use vaults
     pv.vault.clear:
         default: false
         description: Allows players to clear theire vaults
     pv.vault.help:
-        default: false
+        default: true
         description: Allows players to view playervault help
     pv.admin.view:
         default: false
