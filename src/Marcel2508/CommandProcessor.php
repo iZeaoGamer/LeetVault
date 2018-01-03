@@ -54,7 +54,7 @@ class CommandProcessor {
 
     private function showVault(Player $player, int $targetId,int $vault) : bool{
         if($player->getGamemode()==1&&$player->hasPermission("limitedcreative.permission.creative")){
-            $player->sendMessage($this->plugin->msg("Limited creative blocks access to this command while in creative mode!"));
+            $player->sendMessage($this->plugin->msg("§cI'm sorry, but you are not allowed to use /pv in creative mode. Please switch to survival mode"));
             return true;
         }
 
@@ -138,7 +138,7 @@ class CommandProcessor {
 
     private function clearVault(Player $player, int $targetId, int $vault):bool{
         $this->clearVaultContents($targetId,$vault);
-        $player->sendMessage($this->plugin->msg("Cleared ".($player->getId()!=$targetId?"players":"your")." vault content!"));
+        $player->sendMessage($this->plugin->msg("§aCleared §b".($player->getId()!=$targetId?"players":"your")." vault content!"));
         return true;
     }
 
@@ -181,20 +181,20 @@ class CommandProcessor {
     private function wipeVaults(Player $player,int $targetId){
         //TODO: REFACTOR 
         $this->wipePlayerVaults($targetId);
-        $player->sendMessage($this->plugin->msg("Cleared all ".($player->getId()!=$targetId?" vaults of that player!":"your vaults!")));
+        $player->sendMessage($this->plugin->msg("§aCleared all ".($player->getId()!=$targetId?" vaults of that player!":"your vaults!")));
         return true;
     }
 
     private function getHelpPage(Player $player) : bool {
 
         $output = "LeetVault 2.0.0-B1 Help:\n";
-        if($this->hasRight($player,"pv.help",false))$output .= "/pv help - shows this help\n";
+        if($this->hasRight($player,"pv.help",true))$output .= "/pv help - shows this help\n";
 
-        if($this->hasRight($player,"pv.vault.use",false))$output .= "/pv [vaultno] - opens the specified vault - otherwiese the first one\n";
+        if($this->hasRight($player,"pv.vault.use",true))$output .= "/pv [vaultno] - opens the specified vault - otherwiese the first one\n";
 
         if($this->hasRight($player,"pv.admin.edit",false)||$this->hasRight($player,"pv.admin.view",false))$output .= "/pva <vaultno> <playername> - opens the specified vault of the specified player\n";
 
-        if($this->hasRight($player,"pv.vault.clear",false))$output .= "/pv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
+        if($this->hasRight($player,"pv.vault.clear",true))$output .= "/pv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
 
         if($this->hasRight($player,"pv.admin.clear",false))$output .= "/pva clear <#vaultNo/all> <playername> - clears the specified vault of the specified player\n";
 
@@ -205,7 +205,7 @@ class CommandProcessor {
 
     private function setVaultLimit(Player $player, int $limit) : bool{
         $this->plugin->setLimit($limit);
-        $player->sendMessage($this->plugin->msg("Vault limit has been changed to ".$this->plugin->settings["max-vault-amount"]));
+        $player->sendMessage($this->plugin->msg("§4[ADMIN] §cVault limit has been changed to §2".$this->plugin->settings["max-vault-amount"]));
         return true;
     }
 
@@ -238,13 +238,13 @@ class CommandProcessor {
                             }
                             else{
                                 //MAX VAULT EXCEED
-                                $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
+                                $player->sendMessage($this->plugin->msg("§cYou can only use up to§4 ".$this->plugin->settings["max-vault-amount"]." vaults!"));
                                 return true;
                             }
                         }
                         else{
                             //ERROR - Invalid Identifier!
-                            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
+                            $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
                             return false;
                         }
                     }
@@ -272,13 +272,13 @@ class CommandProcessor {
                     }
                     else{
                         //MAX VAULT EXCEED
-                        $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
+                        $player->sendMessage($this->plugin->msg("§cYou can only use up to§4 ".$this->plugin->settings["max-vault-amount"]." vaults!"));
                         return true;
                     }
                 }
                 else{
                     //ERROR - Invalid Identifier!
-                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
+                    $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
                     return false;
                 }
             }
@@ -293,7 +293,7 @@ class CommandProcessor {
         $playerId = $player->getId();
         if($argCount<1){
             //SHOW FIRST VAULT
-            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /lv help for more info!"));
+            $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
             return false;
         }
         else{
@@ -318,25 +318,25 @@ class CommandProcessor {
                                 }
                                 else{
                                     //MAX VAULT EXCEED
-                                    $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
+                                    $player->sendMessage($this->plugin->msg("§cYou can only use up to§4 ".$this->plugin->settings["max-vault-amount"]." vaults!"));
                                     return true;
                                 }
                             }
                             else{
                                 //ERROR - Invalid Identifier!
-                                $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
+                                $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
                                 return false;
                             }
                         }
                     }
                     else{
-                        $player->sendMessage($this->plugin->msg("Can't find a player with that name!"));
+                        $player->sendMessage($this->plugin->msg("§cCan't find a player with that name!"));
                         return false;
                     }
                 }
                 else{
                     //ERROR NOT ENOUGH ARGUMENTS!
-                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
+                    $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
                     return false;
                 }
             }
@@ -360,13 +360,13 @@ class CommandProcessor {
                     }
                     else{
                         //Error not numeric
-                        $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
+                        $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
                         return false;
                     }
                 }
                 else{
                     //ERROR to few arguments
-                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
+                    $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
                     return false;
                 }
             }
@@ -387,26 +387,26 @@ class CommandProcessor {
                             }
                             else{
                                 //MAX VAULT EXCEED
-                                $player->sendMessage($this->plugin->msg("You can only use up to ".$this->plugin->settings["max-vault-amount"]." vaults!"));
+                                $player->sendMessage($this->plugin->msg("§cYou can only use up to§4 ".$this->plugin->settings["max-vault-amount"]." vaults!"));
                                 return true;
                             }
                         }
                         else{
                             //ERROR - Invalid Identifier!
-                            $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
+                            $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
                             return false;
                         }
 
                     }
                     else{
                         //ERROR PLAYER NOT FOUND
-                        $player->sendMessage($this->plugin->msg("Can't find a player with that name!"));
+                        $player->sendMessage($this->plugin->msg("§cCan't find a player with that name!"));
                         return false;
                     }
                 }
                 else{
                     //ERROR: INVALID COMMAND
-                    $player->sendMessage($this->plugin->msg("Wrong command syntax! Type /pv help for more info!"));
+                    $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
                     return false;
                 }
             }
@@ -427,7 +427,7 @@ class CommandProcessor {
         if($player->hasPermission($permissionNode)||$player->hasPermission("*")||$player->isOp()){
             return true;
         }
-        if($showMessage)$player->sendMessage($this->plugin->msg("You are not allowed to use this command!"));
+        if($showMessage)$player->sendMessage($this->plugin->msg("§cYou are not allowed to use this command!"));
         return false;
     }
 
