@@ -21,7 +21,7 @@ permissions:
         description: Allows players to use vaults
     pv.vault.clear:
         default: true
-        description: Allows players to clear theire vaults
+        description: Allows players to clear their vaults
     pv.vault.help:
         default: true
         description: Allows players to view playervault help
