@@ -46,12 +46,12 @@ class PlayerEvents implements Listener {
             }
             if($this->plugin->db->exec($queryList)){
                 if($vaultPlayerAdminId!=-1)
-                    $player->sendMessage($this->plugin->msg("§bSaved the players vault!"));
+                    $player->sendMessage($this->plugin->msg("§6Saved the players vault!"));
                 else
-                    $player->sendMessage($this->plugin->msg("§bSaved your vault!"));
+                    $player->sendMessage($this->plugin->msg("§6Saved your vault!"));
             }
             else{
-                $player->sendMessage($this->plugin->msg("Can't save your vault! Please report this issue to http://leetforum.cc"));
+                $player->sendMessage($this->plugin->msg("§cCan't save your vault! Please report this issue to http://leetforum.cc"));
             }
         }
         else{
