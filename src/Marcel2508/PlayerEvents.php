@@ -19,7 +19,7 @@ class PlayerEvents implements Listener {
     private $inventorySpawner;
     private $commandProcessor;
     
-    public function __construct(LeetVault $plugin) {
+    public function __construct(Playervaults $plugin) {
         $this->plugin = $plugin;
         $this->inventorySpawner = new InventorySpawner();
     }
