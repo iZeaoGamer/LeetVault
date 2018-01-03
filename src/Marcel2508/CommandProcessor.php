@@ -76,7 +76,7 @@ class CommandProcessor {
 
         //Display Vault
         $player->addWindow($inventory);
-        $player->sendMessage($this->plugin->msg("§bOpened §3".($targetId!=$playerId?"players ":"")."§bvault #".$vault));
+        $player->sendMessage($this->plugin->msg("§aOpened §d".($targetId!=$playerId?"players ":"")."§avault #".$vault));
 
         return true;
     }
@@ -187,18 +187,18 @@ class CommandProcessor {
 
     private function getHelpPage(Player $player) : bool {
 
-        $output = "LeetVault 2.0.0-B1 Help:\n";
-        if($this->hasRight($player,"pv.help",true))$output .= "/pv help - shows this help\n";
+        $output = "§2Player§5Vault §b2.0.0-B1 Help:\n";
+        if($this->hasRight($player,"pv.help",true))$output .= "§a/pv help - §2shows this help\n";
 
-        if($this->hasRight($player,"pv.vault.use",true))$output .= "/pv [vaultno] - opens the specified vault - otherwiese the first one\n";
+        if($this->hasRight($player,"pv.vault.use",true))$output .= "§a/pv [vaultno] - §2opens the specified vault - otherwiese the first one\n";
 
-        if($this->hasRight($player,"pv.admin.edit",false)||$this->hasRight($player,"pv.admin.view",false))$output .= "/pva <vaultno> <playername> - opens the specified vault of the specified player\n";
+        if($this->hasRight($player,"pv.admin.edit",false)||$this->hasRight($player,"pv.admin.view",false))$output .= "§c/pva §4<vaultno> <playername> - opens the specified vault of the specified player\n";
 
-        if($this->hasRight($player,"pv.vault.clear",true))$output .= "/pv clear [#vaultNo/all] - clears the specified vault - otherwise the first one\n";
+        if($this->hasRight($player,"pv.vault.clear",true))$output .= "§a/pv clear [#vaultNo/all] - §2clears the specified vault - otherwise the first one\n";
 
-        if($this->hasRight($player,"pv.admin.clear",false))$output .= "/pva clear <#vaultNo/all> <playername> - clears the specified vault of the specified player\n";
+        if($this->hasRight($player,"pv.admin.clear",false))$output .= "§c/pva clear <#vaultNo/all> <playername> - §4clears the specified vault of the specified player\n";
 
-        if($this->hasRight($player,"pv.admin.setlimit",false))$output .= "/pva setlimit <limit> - sets the limit of vaults per player\n";
+        if($this->hasRight($player,"pv.admin.setlimit",false))$output .= "§c/pva setlimit <limit> - §4Sets the limit of vaults per player\n";
         $player->sendMessage($this->plugin->msg($output));
         return true;
     }
