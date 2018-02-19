@@ -26,7 +26,7 @@ class PlayerEvents implements Listener {
 
     private function saveVault(ChestInventory $inventory, Player $player, int $vault, int $vaultPlayerId,int $vaultPlayerAdminId){
 
-        $playerId = $player->getId();
+        $playerId = $player->getUniqueId();
         $gamemode = $player->getGamemode();
         if($playerId===$vaultPlayerId||($vaultPlayerAdminId!=-1&&$vaultPlayerAdminId==$playerId)){
             $queryList = "DELETE FROM `vaults` WHERE `player` = '".$vaultPlayerId."' AND `vault` = '".$vault."';";

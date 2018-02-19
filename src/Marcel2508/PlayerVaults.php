@@ -31,7 +31,8 @@ class PlayerVaults extends PluginBase implements Listener,CommandExecutor{
         $this->settings = $this->getConfig()->getAll();
 
         $this->db = new SQLite3($this->getDataFolder() . "db.bin");
-        $this->db->exec("CREATE TABLE IF NOT EXISTS vaults (player integer, vault integer, gamemode integer, itemid integer, amount integer, meta integer,nbt BLOB, slot integer); ");        //CREATE INDEX IF NOT EXISTS playerInventoriesIndex ON playerInventories (player);
+        //THIS WILL NEED THE SERVERS TO DELETE THE DATABASE FILE IN ORDER TO BE RECREATED...
+        $this->db->exec("CREATE TABLE IF NOT EXISTS vaults (player text, vault integer, gamemode integer, itemid integer, amount integer, meta integer,nbt BLOB, slot integer); ");        //CREATE INDEX IF NOT EXISTS playerInventoriesIndex ON playerInventories (player);
         
         $this->commandProcessor = new CommandProcessor($this);
         $this->getServer()->getPluginManager()->registerEvents(new PlayerEvents($this), $this);
