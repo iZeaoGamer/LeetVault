@@ -14,7 +14,7 @@ use pocketmine\command\CommandExecutor;
 use pocketmine\command\CommandSender;
 use pocketmine\command\Command;
 
-class LeetVault extends PluginBase implements Listener,CommandExecutor{
+class PlayerVaults extends PluginBase implements Listener,CommandExecutor{
 
     public $db;
     public $settings;
@@ -43,7 +43,7 @@ class LeetVault extends PluginBase implements Listener,CommandExecutor{
     }
 
     public function msg($msg) {
-        return TextFormat::GRAY . "[" . TextFormat::BLUE . "LeetVault" .
-        TextFormat::GRAY . "] " . TextFormat::WHITE . $msg;
+        return TextFormat::GRAY . "§5[" . TextFormat::BLUE . "§2Player§aVault" .
+        TextFormat::GRAY . "§5] " . TextFormat::WHITE . $msg;
     }
 }

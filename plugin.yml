@@ -1,39 +1,39 @@
-name: LeetVault
-main: Marcel2508\LeetVault
-version: 1.1.3
+name: VM-PlayerVault
+main: Marcel2508\PlayerVaults
+version: 2.0.0-Beta1
 api: [3.0.0-ALPHA10]
 load: STARTUP
-author: Marcel2508
+author: VMPE Development Team
 description: Allows you to use virtual chest inventories
 
 commands:
- lv:
-  usage: /lv [clear/#vaultNo/help] [#vaultNo (if clear is given)]
-  aliases: ["leetvault"]
-  #permission: leetvault.vault.use
- lva:
-  usage: /lva <#vaultNo/clear/setlimit> <playername/(#vaultNo/all)/#limit> [playername (if clear is given)]
-  aliases: ["leetvaultadmin"]
-  #permission: leetvault.admin.view
+ pv:
+  usage: /pv [clear/#vaultNo/help] [#vaultNo (if clear is given)]
+  aliases: ["playervault"]
+  #permission: pv.vault.use
+ pva:
+  usage: /pva <#vaultNo/clear/setlimit> <playername/(#vaultNo/all)/#limit> [playername (if clear is given)]
+  aliases: ["playervaultadmin"]
+  #permission: pv.admin.view
 permissions:
-    leetvault.vault.use:
-        default: false
+    pv.vault.use:
+        default: true
         description: Allows players to use vaults
-    leetvault.vault.clear:
-        default: false
-        description: Allows players to clear theire vaults
-    leetvault.vault.help:
-        default: false
-        description: Allows players to view leetvault help
-    leetvault.admin.view:
+    pv.vault.clear:
+        default: true
+        description: Allows players to clear their vaults
+    pv.vault.help:
+        default: true
+        description: Allows players to view playervault help
+    pv.admin.view:
         default: false
         description: Allows admins to view players vaults
-    leetvault.admin.edit:
+    pv.admin.edit:
         default: false
         description: Allows admins to edit other players vaults
-    leetvault.admin.clear:
+    pv.admin.clear:
         default: false
         description: Allows admins to clear other players vaults
-    leetvault.admin.setlimit:
+    pv.admin.setlimit:
         default: false
         description: Allows admins to set vault limit server-wide

@@ -19,7 +19,7 @@ class PlayerEvents implements Listener {
     private $inventorySpawner;
     private $commandProcessor;
     
-    public function __construct(LeetVault $plugin) {
+    public function __construct(Playervaults $plugin) {
         $this->plugin = $plugin;
         $this->inventorySpawner = new InventorySpawner();
     }
@@ -46,12 +46,12 @@ class PlayerEvents implements Listener {
             }
             if($this->plugin->db->exec($queryList)){
                 if($vaultPlayerAdminId!=-1)
-                    $player->sendMessage($this->plugin->msg("Saved the players vault!"));
+                    $player->sendMessage($this->plugin->msg("§6Saved the players vault!"));
                 else
-                    $player->sendMessage($this->plugin->msg("Saved your vault!"));
+                    $player->sendMessage($this->plugin->msg("§6Saved your vault!"));
             }
             else{
-                $player->sendMessage($this->plugin->msg("Can't save your vault! Please report this issue to http://leetforum.cc"));
+                $player->sendMessage($this->plugin->msg("§cCan't save your vault! Please report this issue to http://leetforum.cc"));
             }
         }
         else{
@@ -84,7 +84,7 @@ class PlayerEvents implements Listener {
         $player = $event->getPlayer();
         $playerVault = isset($holder->getNBT()->PlayerVault)?$holder->getNBT()->PlayerVault:false;
         if($playerVault){
-            if(($playerVault->AdminView.''==-1&&$this->hasRight($player,"leetvault.vault.use"))||($playerVault->AdminView.''!=-1&&$this->hasRight($player,"leetvault.admin.edit")))//ONLY SAVE IF USER IS PERMITTED TO USE THAT CHEST
+            if(($playerVault->AdminView.''==-1&&$this->hasRight($player,"pv.vault.use"))||($playerVault->AdminView.''!=-1&&$this->hasRight($player,"pv.admin.edit")))//ONLY SAVE IF USER IS PERMITTED TO USE THAT CHEST
                 $this->saveVault($inventory,$player,$playerVault->PlayerVaultNumber.'',$playerVault->PlayerId.'',$playerVault->AdminView.'');
 
             //I KNOW, ITS A FAKE CHEST - Refresh Chunk to remove fake block from Players map!
@@ -93,8 +93,8 @@ class PlayerEvents implements Listener {
     }
 
     private function getCancelledStateForTransaction(Player $player) : bool {//, PlayerInventory $pinv, ChestInventory $cinv) : bool{
-        if($this->hasRight($player,"leetvault.admin.edit"))return false;
-        if($this->hasRight($player,"leetvault.admin.view"))return true;
+        if($this->hasRight($player,"pv.admin.edit"))return false;
+        if($this->hasRight($player,"pv.admin.view"))return true;
         else return true;
     }
 
