@@ -21,7 +21,7 @@ class CommandProcessor {
 
     //DB LOGIC:
     private function getVaultContents($player,$vault){
-        $query = "SELECT * FROM `vaults` WHERE `player` = ".$player." AND `vault` = '".$this->plugin->db->escapeString($vault)."';";
+        $query = "SELECT * FROM `vaults` WHERE `player` = '".$player."' AND `vault` = '".$this->plugin->db->escapeString($vault)."';";
         $res = $this->plugin->db->query($query);
         if($res){
             
@@ -58,7 +58,7 @@ class CommandProcessor {
             return true;
         }
 
-        $playerId=$player->getId();
+        $playerId=$player->getUniqueId();
         //Creating Inventory
         $inventory = $this->inventorySpawner->getInventory($player,[$targetId,$vault,($targetId!==$playerId?$playerId:-1)],"Vault #".$vault);
         //Get Item Array from DB File
@@ -138,7 +138,7 @@ class CommandProcessor {
 
     private function clearVault(Player $player, int $targetId, int $vault):bool{
         $this->clearVaultContents($targetId,$vault);
-        $player->sendMessage($this->plugin->msg("§aCleared §b".($player->getId()!=$targetId?"players":"your")." vault content!"));
+        $player->sendMessage($this->plugin->msg("§aCleared §b".($player->getUniqueId()!=$targetId?"players":"your")." vault content!"));
         return true;
     }
 
@@ -181,7 +181,7 @@ class CommandProcessor {
     private function wipeVaults(Player $player,int $targetId){
         //TODO: REFACTOR 
         $this->wipePlayerVaults($targetId);
-        $player->sendMessage($this->plugin->msg("§aCleared all ".($player->getId()!=$targetId?" vaults of that player!":"your vaults!")));
+        $player->sendMessage($this->plugin->msg("§aCleared all ".($player->getUniqueId()!=$targetId?" vaults of that player!":"your vaults!")));
         return true;
     }
 
@@ -212,7 +212,7 @@ class CommandProcessor {
     //All commands begin with /pv
     private function playerCommand(Player $player, array $args) : bool{
         $argCount = count($args);
-        $playerId = $player->getId();
+        $playerId = $player->getUniqueId();
         if($argCount==0){
             if(!$this->hasRight($player,"pv.vault.use"))return true;
             //SHOW FIRST VAULT
@@ -290,7 +290,7 @@ class CommandProcessor {
     private function adminCommand(Player $player, array $args) : bool{
 
         $argCount = count($args);
-        $playerId = $player->getId();
+        $playerId = $player->getUniqueId();
         if($argCount<1){
             //SHOW FIRST VAULT
             $player->sendMessage($this->plugin->msg("§5Wrong command syntax! §dType /pv help for more info!"));
@@ -303,7 +303,7 @@ class CommandProcessor {
                 if($argCount==3){
                     $tPlayer = $this->plugin->getServer()->getPlayer($args[2]);
                     if($tPlayer){
-                        $tPlayerId = $tPlayer->getId();
+                        $tPlayerId = $tPlayer->getUniqueId();
                         if(strtolower($args[1])=="all"){
                             $this->wipeVaults($player,$tPlayerId);
                             return true;
@@ -376,7 +376,7 @@ class CommandProcessor {
                 if($argCount==2){
                     $tPlayer = $this->plugin->getServer()->getPlayer($args[1]);
                     if($tPlayer){
-                        $tPlayerId = $tPlayer->getId();
+                        $tPlayerId = $tPlayer->getUniqueId();
                         //PLAYER FOUND proceed
                         if(is_numeric($args[0])&&($intArg=intval($args[0]))>0){
                             //IF: Test for limit
